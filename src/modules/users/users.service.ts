@@ -25,7 +25,7 @@ export class UsersService {
     });
   }
 
-  findOneById(userId: number): Promise<User | null> {
+  findOneById(userId: string): Promise<User | null> {
     return this.usersRepository.findOneBy({ id: userId });
   }
 
@@ -33,7 +33,7 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email }, withDeleted });
   }
 
-  async update(userId: number, payload: UpdateUserDto): Promise<User | null> {
+  async update(userId: string, payload: UpdateUserDto): Promise<User | null> {
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -44,7 +44,7 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id: userId });
   }
 
-  async softDelete(userId: number): Promise<User | null> {
+  async softDelete(userId: string): Promise<User | null> {
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException('User not found');

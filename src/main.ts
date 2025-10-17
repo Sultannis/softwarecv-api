@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import cookieParser = require('cookie-parser');
+import * as cookieParser from 'cookie-parser';
+
+import { AppModule } from './app.module';
+
+import { RequestUser } from './modules/auth/entities/request-user.entity';
+
 declare module 'express' {
   interface Request {
-    user?: {
-      id: number;
-    };
+    user?: RequestUser;
   }
 }
 
@@ -18,7 +20,6 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-
   await app.listen(3000);
 }
 bootstrap();

@@ -3,59 +3,48 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
-  Query,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { FindAllUsersQueryDto } from './dto/find-all-users-query.dto';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { UserGuard } from '../auth/guards/user.guard';
+import { Request } from 'express';
 
+@UseGuards(UserGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
-
-  @UseGuards(AdminGuard)
-  @Get()
-  async findAll(@Query() query: FindAllUsersQueryDto) {
-    const { page, perPage } = query;
-
-    const [users, total] = await this.usersService.findAll(page, perPage);
-
-    return {
-      users,
-      meta: {
-        total,
-        page,
-      },
-    };
-  }
-
-  @UseGuards(UserGuard)
   @Get(':userId')
-  async findOne(@Param('userId') userId: number) {
+  async findOne(@Param('userId') userId: string) {
     return {
       user: await this.usersService.findOneById(userId),
     };
   }
 
-  @UseGuards(UserGuard)
   @Patch(':userId')
-  async update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Req() req: Request, @Param('userId') userId: string, @Body() updateUserDto: UpdateUserDto) {
+    if(userId !== req.user?.id) {
+      throw new ForbiddenException({ message: 'You are not allowed to update this user', code: 'FORBIDDEN' });
+    }
+
     return {
       user: await this.usersService.update(userId, updateUserDto),
     };
   }
 
-  @UseGuards(UserGuard)
   @Delete(':userId')
-  async delete(@Param('userId') userId: number) {
+  async delete(@Req() req: Request, @Param('userId') userId: string) {
+    if(userId !== req.user?.id) {
+      throw new ForbiddenException({ message: 'You are not allowed to delete this user', code: 'FORBIDDEN' });
+    }
+
     return {
       user: await this.usersService.softDelete(userId),
     };

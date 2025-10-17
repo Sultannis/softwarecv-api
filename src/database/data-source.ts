@@ -1,5 +1,7 @@
-import { appConfig } from '../config/app.config';
 import { DataSource } from 'typeorm';
+import { config } from 'dotenv';
+
+config();
 
 export const datasourceOptions: {
   type: 'postgres';
@@ -10,11 +12,11 @@ export const datasourceOptions: {
   database: string;
 } = {
   type: 'postgres',
-  host: appConfig.dbHost,
-  port: appConfig.dbPort,
-  username: appConfig.dbUser,
-  password: appConfig.dbPassword,
-  database: appConfig.dbName,
+  host: process.env.DB_HOST || '',
+  port: process.env.DB_PORT ? +process.env.DB_PORT : 0,
+  username: process.env.DB_USER || '',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || '',
 };
 
 export const AppDataSource = new DataSource({
@@ -22,9 +24,9 @@ export const AppDataSource = new DataSource({
   migrations: ['src/database/migrations/*{.ts,.js}'],
   entities: ['src/common/**/**.entity{.ts,.js}'],
   ssl:
-    appConfig.appEnv === 'local'
+    process.env.APP_ENV === 'local'
       ? false
       : {
-          ca: appConfig.caCert,
+          ca: process.env.CACERT,
         },
 });

@@ -1,21 +1,18 @@
-import { Exclude } from 'class-transformer';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
-import { UserCourse } from './user-course.entity';
-import { UserLesson } from './user-lesson.entity';
-import { UserRefreshToken } from './user-refresh-token.entity';
+import { Entity, Column, PrimaryColumn, BeforeInsert, OneToMany } from 'typeorm';
+import { v7 as uuidv7 } from 'uuid';
+import { UploadedResume } from './uploaded-resume.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({
+    name: 'id',
+    type: 'uuid',
+  })
+  id: string;
+  @BeforeInsert()
+  generateId() {
+    this.id = uuidv7();
+  }
 
   @Column({
     name: 'first_name',
@@ -36,21 +33,11 @@ export class User {
   })
   email: string;
 
-  @Exclude()
   @Column({
     name: 'password',
     type: 'varchar',
   })
-  password: string;
-
-  @OneToMany(() => UserCourse, (userCourse) => userCourse.user)
-  courses: UserCourse[];
-
-  @OneToMany(() => UserLesson, (userLesson) => userLesson.user)
-  lessons: UserLesson[];
-
-  @OneToOne(() => UserRefreshToken, (refreshToken) => refreshToken.user)
-  refreshToken: UserRefreshToken[];
+  password?: string;
 
   @Column({
     name: 'created_at',
@@ -59,17 +46,20 @@ export class User {
   })
   createdAt: string;
 
-  @UpdateDateColumn({
+  @Column({
     name: 'updated_at',
     type: 'timestamp',
     default: 'now()',
   })
   updatedAt: string;
 
-  @DeleteDateColumn({
+  @Column({
     name: 'deleted_at',
     type: 'timestamp',
     nullable: true,
   })
   deletedAt: string;
+
+  @OneToMany(() => UploadedResume, (uploadedResume) => uploadedResume.user)
+  uploadedResumes: UploadedResume[];
 }
