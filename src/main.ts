@@ -14,7 +14,7 @@ declare module 'express' {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    cors: { origin: true, credentials: true },
+    cors: { origin: JSON.parse(process.env.CORS_HOSTS || '[]'), credentials: true },
   });
 
   app.use(cookieParser());
